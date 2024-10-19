@@ -1,5 +1,6 @@
 package br.ueg.progweb2.arquitetura.adminmodule.controller;
 
+import br.ueg.progweb2.arquitetura.adminmodule.controller.enums.ModuleAdminSecurityRole;
 import br.ueg.progweb2.arquitetura.adminmodule.dto.GroupStatisticsDTO;
 import br.ueg.progweb2.arquitetura.adminmodule.dto.filtros.SecurityGroupFilterDTO;
 import br.ueg.progweb2.arquitetura.adminmodule.dto.filtros.SecurityUserFilterDTO;
@@ -8,6 +9,7 @@ import br.ueg.progweb2.arquitetura.adminmodule.mapper.SecurityGroupMapper;
 import br.ueg.progweb2.arquitetura.adminmodule.model.SecurityGroup;
 import br.ueg.progweb2.arquitetura.adminmodule.service.SecurityGroupService;
 import br.ueg.progweb2.arquitetura.adminmodule.service.SecurityUserGroupService;
+import br.ueg.progweb2.arquitetura.controllers.enums.ISecurityRole;
 import br.ueg.progweb2.arquitetura.model.dtos.CredencialDTO;
 import br.ueg.progweb2.arquitetura.exceptions.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +41,8 @@ public class SecurityGroupController extends ModuleAdminAbstractController <
         SecurityGroupService,
         SecurityGroupMapper
         >{
+    public static ISecurityRole ROLE_ACTIVATE_INACTIVATE    = ModuleAdminSecurityRole.ACTIVATE_INACTIVATE;
+    public static ISecurityRole ROLE_SEARCH                 = ModuleAdminSecurityRole.SEARCH;
 
     @Autowired
     private SecurityUserGroupService securityUserGroupService;
@@ -114,7 +118,7 @@ public class SecurityGroupController extends ModuleAdminAbstractController <
      * @param securityGroupFilterDTO -
      * @return -
      */
-    @PreAuthorize("hasRole('ROLE_GRUPO_SEARCH')")
+    @PreAuthorize("hasRole(#root.this.getRoleName(#root.this.ROLE_SEARCH))")
     @Operation(description = "Recupera as informações de Grupo conforme dados informados no filtro de busca", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de Grupo pelo filtro",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -218,7 +222,7 @@ public class SecurityGroupController extends ModuleAdminAbstractController <
      * @param id -
      * @return -
      */
-    @PreAuthorize("hasRole('ROLE_GRUPO_ACTIVATE_INACTIVATE')")
+    @PreAuthorize("hasRole(#root.this.getRoleName(#root.this.ROLE_ACTIVATE_INACTIVATE))")
     @Operation(description = "Inativa o Grupo pelo id informado.", responses = {
             @ApiResponse(responseCode = "200", description = "Grupo Inativado",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),

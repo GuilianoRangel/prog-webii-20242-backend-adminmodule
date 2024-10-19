@@ -4,11 +4,13 @@
  */
 package br.ueg.progweb2.arquitetura.adminmodule.controller;
 
+import br.ueg.progweb2.arquitetura.adminmodule.controller.enums.ModuleAdminSecurityRole;
 import br.ueg.progweb2.arquitetura.adminmodule.dto.filtros.SecurityUserFilterDTO;
 import br.ueg.progweb2.arquitetura.adminmodule.dto.model.SecurityUserDTO;
 import br.ueg.progweb2.arquitetura.adminmodule.mapper.SecurityUserMapper;
 import br.ueg.progweb2.arquitetura.adminmodule.model.SecurityUser;
 import br.ueg.progweb2.arquitetura.adminmodule.service.SecurityUserService;
+import br.ueg.progweb2.arquitetura.controllers.enums.ISecurityRole;
 import br.ueg.progweb2.arquitetura.exceptions.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,6 +47,8 @@ public class SecurityUserController extends ModuleAdminAbstractController<
 		SecurityUserService,
 		SecurityUserMapper
 		> {
+	public static ISecurityRole ROLE_ACTIVATE_INACTIVATE    = ModuleAdminSecurityRole.ACTIVATE_INACTIVATE;
+	public static ISecurityRole ROLE_SEARCH                 = ModuleAdminSecurityRole.SEARCH;
 
 	@Autowired
 	private SecurityUserMapper securityUserMapper;
@@ -92,7 +96,7 @@ public class SecurityUserController extends ModuleAdminAbstractController<
 	 * @param filterDTO
 	 * @return
 	 */
-	@PreAuthorize("hasRole('ROLE_USUARIO_SEARCH')")
+	@PreAuthorize("hasRole(#root.this.getRoleName(#root.this.ROLE_SEARCH))")
 	@Operation(description = "Recupera os usuarios pelo Filtro Informado de usuários ativos.", responses = {
 			@ApiResponse(responseCode = "200", description = "Lista de Grupo pelo filtro",
 					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -131,7 +135,7 @@ public class SecurityUserController extends ModuleAdminAbstractController<
 	 * @param filtroDTO
 	 * @return
 	 */
-	@PreAuthorize("hasRole('ROLE_USUARIO_SEARCH')")
+	@PreAuthorize("hasRole(#root.this.getRoleName(#root.this.ROLE_SEARCH))")
 	@Operation(description = "Recupera os usuarios pelo Filtro Informado.", responses = {
 			@ApiResponse(responseCode = "200", description = "Lista de Grupo pelo filtro",
 					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -164,7 +168,7 @@ public class SecurityUserController extends ModuleAdminAbstractController<
 	 * @param id
 	 * @return
 	 */
-	@PreAuthorize("hasRole('ROLE_USUARIO_ACTIVATE_INACTIVATE')")
+	@PreAuthorize("hasRole(#root.this.getRoleName(#root.this.ROLE_ACTIVATE_INACTIVATE))")
 	@Operation(description = "Inativa o usuario.", responses = {
 			@ApiResponse(responseCode = "200", description = "Sucesso",
 					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
@@ -193,7 +197,7 @@ public class SecurityUserController extends ModuleAdminAbstractController<
 	 * @param id
 	 * @return
 	 */
-	@PreAuthorize("hasRole('ROLE_USUARIO_ACTIVATE_INACTIVATE')")
+	@PreAuthorize("hasRole(#root.this.getRoleName(#root.this.ROLE_ACTIVATE_INACTIVATE))")
 	@Operation(description = "Ativa o usuário.", responses = {
 			@ApiResponse(responseCode = "200", description = "Sucesso",
 					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),

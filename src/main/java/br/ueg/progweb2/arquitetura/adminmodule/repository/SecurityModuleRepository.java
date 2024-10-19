@@ -21,4 +21,6 @@ public interface SecurityModuleRepository extends JpaRepository<SecurityModule, 
 			+ " ORDER BY module.name ASC, features.name ASC ")
 	List<SecurityModule> getActives();
 
+	SecurityModule findByName(String name);
+
 }

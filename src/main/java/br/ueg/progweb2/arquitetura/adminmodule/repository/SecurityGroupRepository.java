@@ -23,6 +23,8 @@ public interface SecurityGroupRepository extends JpaRepository<SecurityGroup, Lo
             " and ug.status=:status")
     List<SecurityGroup> findByFilter(String name, StatusActiveInactive status);
 
+    SecurityGroup findByName(String name);
+
 
 
     /**

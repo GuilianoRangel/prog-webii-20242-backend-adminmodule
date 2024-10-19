@@ -2,9 +2,14 @@ package br.ueg.progweb2.arquitetura.adminmodule.service;
 
 import br.ueg.progweb2.arquitetura.adminmodule.model.*;
 import br.ueg.progweb2.arquitetura.adminmodule.model.enums.StatusActiveInactive;
+import br.ueg.progweb2.arquitetura.adminmodule.repository.SecurityFeatureRepository;
 import br.ueg.progweb2.arquitetura.adminmodule.repository.SecurityGroupRepository;
 import br.ueg.progweb2.arquitetura.adminmodule.repository.SecurityModuleRepository;
 import br.ueg.progweb2.arquitetura.adminmodule.repository.SecurityUserRepository;
+import br.ueg.progweb2.arquitetura.controllers.GenericCRUDController;
+import br.ueg.progweb2.arquitetura.controllers.SecuritedController;
+import br.ueg.progweb2.arquitetura.controllers.enums.ISecurityRole;
+import br.ueg.progweb2.arquitetura.reflection.RestControllerInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -23,133 +29,143 @@ public class SecurityInitializeService {
     private static final Logger LOG =
             LoggerFactory.getLogger(SecurityInitializeService.class);
     @Autowired
-    private SecurityGroupRepository grupoRepository;
+    private SecurityGroupRepository securityGroupRepository;
     @Autowired
     private SecurityModuleRepository securityModuleRepository;
     @Autowired
-    private SecurityUserRepository usuarioRepository;
+    private SecurityUserRepository securityUserRepository;
+
+    @Autowired
+    private RestControllerInspector restControllerInspector;
+    @Autowired
+    private SecurityFeatureRepository securityFeatureRepository;
 
     public void initialize(){
         LOG.info("initiateDemoInstance");
-        SecurityUser securityUser = getNewUsuario();
-        securityUser = usuarioRepository.findByLogin(securityUser.getLogin());
+        SecurityUser securityUser = getNewSecurityUser();
+        securityUser = securityUserRepository.findByLogin(securityUser.getLogin());
         //Caso já tenha usuário não executa novamente.
         if(Objects.nonNull(securityUser)){
             return;
         }
 
-        SecurityModule moduloUsuario = createModuloCrud("SECURITYUSER", "Manter Usuário");
+        Set<SecurityModule> securityModules = this.createModulesFromControllerWithNotExits();
 
-        SecurityModule moduloGrupo = createModuloCrud("SECURITYGROUP", "Manter Grupo");
-
-        SecurityGroup securityGroup = createGrupoAdmin(Arrays.asList(moduloUsuario, moduloGrupo));
+        SecurityGroup securityGroup = createGrupoAdmin(securityModules);
 
         createUsuarioAdmin(securityGroup);
     }
 
-    private SecurityModule createModuloCrud(String moduloMNemonico, String moduloNome) {
-        SecurityModule moduloUsuario = new SecurityModule();
+    private Set<SecurityModule> createModulesFromControllerWithNotExits() {
+        Set<SecurityModule> securityModules = new HashSet<>();
+        List<Class<?>> controllers = this.restControllerInspector.listRestControllers();
+        //TODO PAREI AQUI verificar para outra forma de filtrar, pois assim está obrigando a ser erdado de generic
+        controllers.stream().map(ClassUtils::getUserClass).filter(c -> implementsInterface(c,SecuritedController.class)).forEach(controller -> {
+            GenericCRUDController<?, ?, ?, ?, ?, ?, ?, ?> restControllerBean = restControllerInspector.getRestControllerBeanByClassName(controller.getSimpleName());
 
-        moduloUsuario.setMnemonic(moduloMNemonico);
-        moduloUsuario.setName(moduloNome);
-        moduloUsuario.setStatus(StatusActiveInactive.ACTIVE);
-        moduloUsuario = securityModuleRepository.save(moduloUsuario);
+            String securityModuleMNemonic = restControllerBean.getSecurityModuleName().toUpperCase();
+            String securityModuleLabel = restControllerBean.getSecurityModuleLabel();
+            SecurityModule securityModule = securityModuleRepository.findByName(securityModuleMNemonic);
+            if(Objects.isNull(securityModule)){
+                securityModule = new SecurityModule();
 
-        final SecurityModule lModuloUsuario = moduloUsuario;
-        Set<SecurityFeature> funcionaldiades = getFuncionalidadesCrud();
+                securityModule.setMnemonic(securityModuleMNemonic);
+                securityModule.setName(securityModuleLabel);
+                securityModule.setStatus(StatusActiveInactive.ACTIVE);
+                securityModule = securityModuleRepository.save(securityModule);
+            }
 
-/*        funcionaldiades.stream().map(
-                funcionalidade -> {
-                    funcionalidade.setModulo(lModuloUsuario);
-                    return funcionalidade;
-                }).collect(Collectors.toSet());
-        // equivalente com for*/
-        for(SecurityFeature securityFeature : funcionaldiades){
-            securityFeature.setModule(moduloUsuario);
+            Set<SecurityFeature> features = getCrudFeatures(restControllerBean, securityModule);
+
+            for(SecurityFeature securityFeature : features){
+                securityFeature.setModule(securityModule);
+            }
+
+            securityModule.setFeatures(features);
+            securityModule = securityModuleRepository.save(securityModule);
+            securityModules.add(securityModule);
+        });
+
+        return securityModules;
+    }
+    public static boolean implementsInterface(Class<?> clazz, Class<?> interfaceClass) {
+        // Verifica se a classe atual ou qualquer de suas superclasses implementa a interface
+        while (clazz != null) {
+            Class<?>[] interfaces = clazz.getInterfaces();
+            for (Class<?> iface : interfaces) {
+                if (iface.equals(interfaceClass)) {
+                    return true;
+                }
+            }
+            // Move para a superclasse
+            clazz = clazz.getSuperclass();
         }
-
-        moduloUsuario.setFeatures(funcionaldiades);
-        moduloUsuario = securityModuleRepository.save(moduloUsuario);
-        return moduloUsuario;
+        return false;
     }
 
     /**
      * retorna Funcionalidades padrão de um CRRUD
      * @return
      */
-    private Set<SecurityFeature> getFuncionalidadesCrud() {
+    private Set<SecurityFeature> getCrudFeatures(GenericCRUDController<?,?,?,?,?,?,?,?> controller, SecurityModule securityModule) {
         Set<SecurityFeature> securityFeatures = new HashSet<>();
 
-        SecurityFeature fManter = new SecurityFeature();
-        fManter.setMnemonic("CREATE");
-        fManter.setName("Incluir");
-        fManter.setStatus(StatusActiveInactive.ACTIVE);
-        securityFeatures.add(fManter);
+        List<ISecurityRole> securityRoles = controller.getSecurityModuleFeatures();
+        String securityModuleMnemonic = securityModule.getMnemonic();
 
-        fManter = new SecurityFeature();
-        fManter.setMnemonic("ALTER");
-        fManter.setName("Alterar");
-        fManter.setStatus(StatusActiveInactive.ACTIVE);
-        securityFeatures.add(fManter);
-
-        fManter = new SecurityFeature();
-        fManter.setMnemonic("ACTIVATE_INACTIVATE");
-        fManter.setName("Ativar/Inativar");
-        fManter.setStatus(StatusActiveInactive.ACTIVE);
-        securityFeatures.add(fManter);
-
-        fManter = new SecurityFeature();
-        fManter.setMnemonic("SEARCH");
-        fManter.setName("Pesquisar");
-        fManter.setStatus(StatusActiveInactive.ACTIVE);
-        securityFeatures.add(fManter);
-
-        fManter = new SecurityFeature();
-        fManter.setMnemonic("READ_ALL");
-        fManter.setName("Listar todos");
-        fManter.setStatus(StatusActiveInactive.ACTIVE);
-        securityFeatures.add(fManter);
-
-        fManter = new SecurityFeature();
-        fManter.setMnemonic("READ");
-        fManter.setName("Visualizar");
-        fManter.setStatus(StatusActiveInactive.ACTIVE);
-        securityFeatures.add(fManter);
+        securityRoles.forEach(securityRole -> {
+            String featureMnemonic = securityRole.getName();
+            SecurityFeature securityFeatureDb = securityFeatureRepository.findByModuleMnemonicAndMnemonic(securityModuleMnemonic, featureMnemonic);
+            if(Objects.isNull(securityFeatureDb)) {
+                securityFeatureDb = new SecurityFeature();
+                securityFeatureDb.setMnemonic(securityRole.getName());
+                securityFeatureDb.setName(securityRole.getLabel());
+                securityFeatureDb.setStatus(StatusActiveInactive.ACTIVE);
+                securityFeatures.add(securityFeatureDb);
+            }
+        });
         return securityFeatures;
     }
 
-    private SecurityGroup createGrupoAdmin(List<SecurityModule> modulos) {
-        SecurityGroup securityGroup = new SecurityGroup();
-        securityGroup.setName("Administradores");
-        securityGroup.setDescription("Grupo de Administradores");
-        securityGroup.setStatus(StatusActiveInactive.ACTIVE);
-        securityGroup = grupoRepository.save(securityGroup);
-        final SecurityGroup lSecurityGroup = securityGroup;
-        securityGroup.setGroupFeatures(new HashSet<>());
+    private SecurityGroup createGrupoAdmin(Set<SecurityModule> modulos) {
+        SecurityGroup securityGroupAdmin = securityGroupRepository.findByName("Administradores");
 
-        modulos.forEach(modulo -> {
-            lSecurityGroup.getGroupFeatures().addAll(
-                    modulo.getFeatures().stream().map(
-                            funcionalidade -> new SecurityGroupFeature(null, lSecurityGroup, funcionalidade)
-                    ).collect(Collectors.toSet())
-            );
-        });
+        //TODO tratar para atualizar Grupos já existentes
+        if(Objects.isNull(securityGroupAdmin)){
+            securityGroupAdmin = new SecurityGroup();
+            securityGroupAdmin.setName("Administradores");
+            securityGroupAdmin.setDescription("Grupo de Administradores");
+            securityGroupAdmin.setStatus(StatusActiveInactive.ACTIVE);
+            securityGroupAdmin = securityGroupRepository.save(securityGroupAdmin);
 
-        grupoRepository.save(securityGroup);
-        return securityGroup;
+            final SecurityGroup lSecurityGroup = securityGroupAdmin;
+            modulos.forEach(modulo -> {
+                if(Objects.isNull(lSecurityGroup.getGroupFeatures())){
+                    lSecurityGroup.setGroupFeatures(new HashSet<>());
+                }
+                lSecurityGroup.getGroupFeatures().addAll(
+                        modulo.getFeatures().stream().map(
+                                funcionalidade -> new SecurityGroupFeature(null, lSecurityGroup, funcionalidade)
+                        ).collect(Collectors.toSet())
+                );
+            });
+            securityGroupRepository.save(securityGroupAdmin);
+        }
+
+        return securityGroupAdmin;
     }
     private void createUsuarioAdmin(SecurityGroup securityGroup) {
-        SecurityUser securityUser = getNewUsuario();
+        SecurityUser securityUser = getNewSecurityUser();
 
-        securityUser = usuarioRepository.save(securityUser);
+        securityUser = securityUserRepository.save(securityUser);
 
         Set<SecurityUserGroup> securityUserGroups = new HashSet<>();
         securityUserGroups.add(new SecurityUserGroup(null, securityUser, securityGroup));
         securityUser.setGroups(securityUserGroups);
-        securityUser = usuarioRepository.save(securityUser);
+        securityUser = securityUserRepository.save(securityUser);
     }
 
-    private static SecurityUser getNewUsuario() {
+    private static SecurityUser getNewSecurityUser() {
         SecurityUser securityUser = new SecurityUser();
         securityUser.setStatus(StatusActiveInactive.ACTIVE);
         securityUser.setCreatedDate(LocalDate.now());
