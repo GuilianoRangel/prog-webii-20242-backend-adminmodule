@@ -1,4 +1,4 @@
-package br.ueg.progweb2.arquitetura.adminmodule;
+package br.ueg.progweb2.exampleuse;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
@@ -16,16 +16,20 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication(
         scanBasePackages = {
                 //Para funcionamento da Arquitetura
-                "br.ueg.progweb2.arquitetura.*"}
+                "br.ueg.progweb2.arquitetura.*",
+                "br.ueg.progweb2.exampleuse.*"
+        }
 )
 @EntityScan(basePackageClasses = { Jsr310JpaConverters.class },
         basePackages = {
                 //Para funcionamento da Arquitetura
-                "br.ueg.progweb2.arquitetura.*"}
+                "br.ueg.progweb2.arquitetura.*",
+                "br.ueg.progweb2.exampleuse.*"}
 )
 @EnableJpaRepositories(basePackages = {
         //Para funcionamento da Arquitetura
-        "br.ueg.progweb2.arquitetura.*"
+        "br.ueg.progweb2.arquitetura.*",
+        "br.ueg.progweb2.exampleuse.*"
 })
 @OpenAPIDefinition(servers = {@Server(url = "${servidor.url}", description = "Default Server URL")})
 public class ProgWebi20242BackendAdminmoduleApplication {

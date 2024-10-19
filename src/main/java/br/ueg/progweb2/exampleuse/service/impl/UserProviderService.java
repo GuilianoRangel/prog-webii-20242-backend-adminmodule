@@ -1,4 +1,4 @@
-package br.ueg.progweb2.arquitetura.adminmodule.appexample.service.impl;
+package br.ueg.progweb2.exampleuse.service.impl;
 
 import br.ueg.progweb2.arquitetura.adminmodule.exception.AdminModuleMessageCode;
 import br.ueg.progweb2.arquitetura.adminmodule.mapper.SecurityUserMapper;

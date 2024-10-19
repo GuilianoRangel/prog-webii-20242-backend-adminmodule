@@ -1,4 +1,4 @@
-package br.ueg.progweb2.arquitetura.adminmodule.appexample.service.impl;
+package br.ueg.progweb2.exampleuse.service.impl;
 
 import br.ueg.progweb2.arquitetura.adminmodule.service.SecurityInitializeService;
 import br.ueg.progweb2.arquitetura.service.AbstractAppStartupRunner;

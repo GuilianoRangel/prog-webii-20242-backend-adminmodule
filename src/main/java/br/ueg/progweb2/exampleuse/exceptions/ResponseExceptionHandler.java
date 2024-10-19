@@ -2,7 +2,7 @@
  * ResponseExceptionHandler.java
  * Copyright (c) UEG.
  */
-package br.ueg.progweb2.arquitetura.adminmodule.appexample.exceptions;
+package br.ueg.progweb2.exampleuse.exceptions;
 
 import br.ueg.progweb2.arquitetura.exceptions.ApiRestResponseExceptionHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;

@@ -2,7 +2,7 @@
  * SwaggerConfig.java
  * Copyright (c) UEG.
  */
-package br.ueg.progweb2.arquitetura.adminmodule.appexample.configuration;
+package br.ueg.progweb2.exampleuse.configuration;
 
 import br.ueg.progweb2.arquitetura.config.ApiSwaggerConfig;
 import org.springframework.context.annotation.Configuration;
