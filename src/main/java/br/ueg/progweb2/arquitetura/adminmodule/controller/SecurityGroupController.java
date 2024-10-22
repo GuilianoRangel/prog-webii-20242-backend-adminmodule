@@ -31,7 +31,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-@Tag(name = "Grupo API", description = "Manutenção de Grupos de usuários")
+@Tag(name = "SecurityGroupAPI", description = "Manutenção de Grupos de usuários")
 @RestController
 @RequestMapping(path = "${app.api.base}/groups")
 public class SecurityGroupController extends ModuleAdminAbstractController <

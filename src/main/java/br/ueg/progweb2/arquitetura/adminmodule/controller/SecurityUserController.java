@@ -37,7 +37,7 @@ import java.util.List;
  * 
  * @author UEG
  */
-@Tag(name = "Usuario API", description = "Manutenção de usuários do sistema")
+@Tag(name = "SecurityUserAPI", description = "Manutenção de usuários do sistema")
 @RestController
 @RequestMapping("${app.api.base}/user")
 public class SecurityUserController extends ModuleAdminAbstractController<

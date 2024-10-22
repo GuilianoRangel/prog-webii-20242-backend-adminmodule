@@ -9,6 +9,7 @@ import br.ueg.progweb2.arquitetura.adminmodule.repository.SecurityUserRepository
 import br.ueg.progweb2.arquitetura.controllers.GenericCRUDController;
 import br.ueg.progweb2.arquitetura.controllers.SecuritedController;
 import br.ueg.progweb2.arquitetura.controllers.enums.ISecurityRole;
+import br.ueg.progweb2.arquitetura.reflection.ReflectionUtils;
 import br.ueg.progweb2.arquitetura.reflection.RestControllerInspector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class SecurityInitializeService {
         Set<SecurityModule> securityModules = new HashSet<>();
         List<Class<?>> controllers = this.restControllerInspector.listRestControllers();
         //TODO PAREI AQUI verificar para outra forma de filtrar, pois assim está obrigando a ser erdado de generic
-        controllers.stream().map(ClassUtils::getUserClass).filter(c -> implementsInterface(c,SecuritedController.class)).forEach(controller -> {
+        controllers.stream().map(ClassUtils::getUserClass).filter(c -> ReflectionUtils.implementsInterface(c,SecuritedController.class)).forEach(controller -> {
             GenericCRUDController<?, ?, ?, ?, ?, ?, ?, ?> restControllerBean = restControllerInspector.getRestControllerBeanByClassName(controller.getSimpleName());
 
             String securityModuleMNemonic = restControllerBean.getSecurityModuleName().toUpperCase();
@@ -87,20 +88,6 @@ public class SecurityInitializeService {
         });
 
         return securityModules;
-    }
-    public static boolean implementsInterface(Class<?> clazz, Class<?> interfaceClass) {
-        // Verifica se a classe atual ou qualquer de suas superclasses implementa a interface
-        while (clazz != null) {
-            Class<?>[] interfaces = clazz.getInterfaces();
-            for (Class<?> iface : interfaces) {
-                if (iface.equals(interfaceClass)) {
-                    return true;
-                }
-            }
-            // Move para a superclasse
-            clazz = clazz.getSuperclass();
-        }
-        return false;
     }
 
     /**
