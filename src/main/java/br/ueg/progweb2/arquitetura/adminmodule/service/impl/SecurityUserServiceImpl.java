@@ -73,6 +73,13 @@ public class SecurityUserServiceImpl
         return byIdFetch.get();
     }
 
+    @Override
+    public SecurityUser update(SecurityUser dataToUpdate) {
+        SecurityUser securityUserDB = this.validateIdModelExists(dataToUpdate.getId());
+        dataToUpdate.setPassword(securityUserDB.getPassword());
+        return super.update(dataToUpdate);
+    }
+
     /**
      * Retorna a Lista de {@link SecurityUserDTO} conforme o filtro pesquisado.
      *
@@ -134,7 +141,7 @@ public class SecurityUserServiceImpl
      * @return
      */
     public SecurityUser getByIdFetch(final Long id) {
-        return repository.findByIdFetch(id).orElse(null);
+        return repository.findByIdFetch(id).orElseThrow(() ->new BusinessException(ApiMessageCode.ERROR_RECORD_NOT_FOUND));
     }
 
     /**

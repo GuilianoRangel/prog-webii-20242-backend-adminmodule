@@ -21,6 +21,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -88,7 +89,11 @@ public @Data class SecurityUser implements GenericModel<Long>, Serializable{
 	 */
 	@Transient
 	public boolean isActiveState() {
-		return status != null && StatusActiveInactive.ACTIVE.getId().equals(status.getId());
+		return Objects.nonNull(status)
+				&& StatusActiveInactive.ACTIVE.getId().equals(status.getId())
+				&& (Objects.isNull(blockedAccess)
+				|| StatusYesNo.NO.getId().equals(blockedAccess.getId()))
+		;
 	}
 
 }

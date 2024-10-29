@@ -20,13 +20,15 @@ public class SecurityUserCreateValidation implements IValidations<SecurityUser> 
     protected SecurityUserRepository repository;
     @Override
     public void validate(SecurityUser securityUser, ValidationAction action) {
-        if(Objects.equals(ValidationAction.CREATE, action)) {
+        if(Objects.equals(ValidationAction.CREATE, action) ||
+                Objects.equals(ValidationAction.UPDATE, action)
+        ) {
             validateDuplicateLoginOnCreate(securityUser);
         }
     }
 
     private void validateDuplicateLoginOnCreate(SecurityUser securityUser) {
-        Long count = repository.countByLogin(securityUser.getLogin());
+        Long count = repository.countByLogin(securityUser.getLogin().trim());
 
         if ( (count > BigDecimal.ONE.longValue() && securityUser.getId()!=null) ||
                 (count > BigDecimal.ZERO.longValue() && securityUser.getId()==null)

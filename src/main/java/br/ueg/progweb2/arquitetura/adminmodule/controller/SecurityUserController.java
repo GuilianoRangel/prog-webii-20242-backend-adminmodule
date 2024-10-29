@@ -49,6 +49,7 @@ public class SecurityUserController extends ModuleAdminAbstractController<
 		> {
 	public static ISecurityRole ROLE_ACTIVATE_INACTIVATE    = ModuleAdminSecurityRole.ACTIVATE_INACTIVATE;
 	public static ISecurityRole ROLE_SEARCH                 = ModuleAdminSecurityRole.SEARCH;
+	public static ISecurityRole BLOCK_UNBLOCK				= ModuleAdminSecurityRole.BLOCK_UNBLOCK;
 
 	@Autowired
 	private SecurityUserMapper securityUserMapper;

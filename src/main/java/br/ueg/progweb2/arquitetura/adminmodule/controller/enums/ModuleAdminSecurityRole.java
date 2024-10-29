@@ -7,6 +7,7 @@ import lombok.Getter;
 public enum ModuleAdminSecurityRole implements ISecurityRole {
     SEARCH              ("SEARCH"               , "Pesquisar"),
     ACTIVATE_INACTIVATE ("ACTIVATE_INACTIVATE"  , "Ativar/Desativar"),
+    BLOCK_UNBLOCK("BLOCK_UNBLOCK", "Bloquear/Desbloquear"),
     ;
     private final String name;
 
