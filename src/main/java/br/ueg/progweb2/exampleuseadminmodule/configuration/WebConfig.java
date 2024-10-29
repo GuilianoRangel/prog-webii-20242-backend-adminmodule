@@ -2,7 +2,7 @@
  * WebConfig.java
  * Copyright (c) UEG.
  */
-package br.ueg.progweb2.exampleuse.configuration;
+package br.ueg.progweb2.exampleuseadminmodule.configuration;
 
 import br.ueg.progweb2.arquitetura.config.ApiWebConfig;
 import org.springframework.context.annotation.Bean;
