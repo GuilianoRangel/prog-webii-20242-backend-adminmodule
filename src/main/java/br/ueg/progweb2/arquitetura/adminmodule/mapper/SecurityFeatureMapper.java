@@ -5,13 +5,19 @@ import br.ueg.progweb2.arquitetura.adminmodule.dto.model.SecurityFeatureDTO;
 import br.ueg.progweb2.arquitetura.adminmodule.model.SecurityFeature;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 /**
  * Classe adapter referente a entidade {@link SecurityFeature}.
  *
  * @author UEG
  */
-@Mapper(componentModel = "spring", uses = { StatusYesNoMapper.class})
+@Mapper(componentModel = "spring",
+        uses = { StatusYesNoMapper.class},
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, //checa se o valor é nulo antes de setar
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE //se o valor não for passado não faz nada.
+)
 public interface SecurityFeatureMapper {
     /**
      * Converte a entidade {@link SecurityFeature} em DTO {@link SecurityFeatureDTO}
