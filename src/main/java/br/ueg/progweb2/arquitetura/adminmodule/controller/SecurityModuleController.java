@@ -32,7 +32,7 @@ import java.util.List;
  * @author UEG
  */
 @RestController
-@Tag(name = "Módulo Sistema API", description = "Informações dos Modulos do Sistema")
+@Tag(name = "SecurityModuleAPI", description = "Informações dos Modulos do Sistema")
 @RequestMapping("${app.api.base}/modules")
 public class SecurityModuleController  {
 
@@ -63,7 +63,7 @@ public class SecurityModuleController  {
 							schema = @Schema(implementation = MessageResponse.class)))
 	})
 	@GetMapping(path = "/active-modules", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<?> getModulosAtivos() {
+	public ResponseEntity<?> getActiveModules() {
 		List<SecurityModule> modulos = securityModuleService.getActives();
 		List<SecurityModuleDTO> modulosDTO = new ArrayList<>();
 		for(SecurityModule modulo: modulos){
