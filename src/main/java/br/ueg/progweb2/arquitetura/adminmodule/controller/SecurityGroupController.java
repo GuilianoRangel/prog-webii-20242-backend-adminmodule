@@ -248,7 +248,7 @@ public class SecurityGroupController extends ModuleAdminAbstractController <
      * @param id -
      * @return -
      */
-    @PreAuthorize("hasRole('ROLE_GRUPO_ACTIVATE_INACTIVATE')")
+    @PreAuthorize("hasRole(#root.this.getRoleName(#root.this.ROLE_ACTIVATE_INACTIVATE))")
     @Operation(description = "Ativa o Grupo pelo id informado.", responses = {
             @ApiResponse(responseCode = "200", description = "Grupo Inativado",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
@@ -290,7 +290,7 @@ public class SecurityGroupController extends ModuleAdminAbstractController <
         return ResponseEntity.ok(grupoEstatisticas);
     }
 
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
 
     @Operation(description = "Retorna Relatório de Grupos.", responses = {
             @ApiResponse(responseCode = "200", description = "Lista de Grupo",
