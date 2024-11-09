@@ -316,7 +316,6 @@ public class SecurityUserController extends ModuleAdminAbstractController<
 		return this.toPDF(service.generateReport(null),"Relatorio-grupo2.pdf");
 	}
 
-	@PreAuthorize("isAnonymous()")
 	@Operation(description = "Carregar dados iniciais - sistema admin Module", responses = {
 			@ApiResponse(responseCode = "200", description = "Sucesso",
 					content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
